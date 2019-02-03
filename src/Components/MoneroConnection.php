@@ -2,8 +2,10 @@
 
 namespace Monero\Components;
 
+use Monero\Structs\Account;
 use Monero\Structs\AccountAddress;
 use Monero\Structs\AccountsResult;
+use Monero\Structs\AccountTag;
 use Monero\Structs\AddressIndex;
 use Monero\Structs\Balance;
 use Monero\Structs\CreateAddress;
@@ -168,12 +170,11 @@ class MoneroConnection
 
 	/**
 	 * @param string|null $label
-	 * @return string
+	 * @return Account
 	 */
-	public function createAccount(?string $label = null) : string {
-		if (!is_null($label))
-			exit("OK");
-		return (string)$this->_run("create_account")["address"];
+	public function createAccount(?string $label = null) : Account {
+		$data = $this->_run("create_account",["label" => $label]);
+		return new Account($data['account_index'],(string)$label,$data["address"]);
 	}
 
 	/**
@@ -186,7 +187,6 @@ class MoneroConnection
 		return new CreateAddress($data["address"],$data["address_index"]);
 	}
 
-
 	/**
 	 * @param int $accountIndex
 	 * @param int $addressIndex
@@ -194,6 +194,14 @@ class MoneroConnection
 	 */
 	public function labelAddress(int $accountIndex, int $addressIndex, string $label) {
 		$this->_run("label_address",["index" => [$accountIndex,$addressIndex], "label" => $label]);
+	}
+
+	/**
+	 * @param int $accountIndex
+	 * @param string $label
+	 */
+	public function labelAccount(int $accountIndex, string $label) {
+		$this->_run("label_account",["account_index" => $accountIndex,"label" => $label]);
 	}
 
 	/**
@@ -220,5 +228,27 @@ class MoneroConnection
 		);
 	}
 
+	/**
+	 * @param string $tag
+	 * @param array $accountIndices
+	 */
+	public function tagAccounts(string $tag, array $accountIndices) {
+		$this->_run("tag_accounts",["tag" => $tag, "accounts" => $accountIndices]);
+	}
 
+	/**
+	 * @return AccountTag[]
+	 * TODO add "label" in return
+	 */
+	public function getAccountTags() : array {
+		$data = $this->_run("get_account_tags");
+		$tags = [];
+		foreach($data["account_tags"] as $tagArr)
+			$tags[] = new AccountTag($tagArr["accounts"],$tagArr["tag"]);
+		return $tags;
+	}
+
+	public function untagAccounts(array $accountIndices) {
+		//$this->_run("untag_accounts",["accounts"])
+	}
 }

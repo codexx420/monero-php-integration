@@ -26,17 +26,18 @@ class TestCommand extends Command
 		$output->writeln("Starting command");
 		$connection = new MoneroConnection("localhost",18001,"http","demo","demo");
 
-		//$data = $connection->_run("get_accounts");
-		//print_r($data);
+		$data = $connection->_run("get_account_tags");
+		print_r($data);
 
-		//$connection->labelAddress(393,0,"test1111");
-		$data = $connection->getAccounts();
-		$output->writeln("Total Balance" . $data->getTotalBalance());
+		//$connection->tagAccounts("day1",[0,1,2,3]);
+		//$data = $connection->createAccount("acab");
+		//$output->writeln("Index " . $data->getIndex() . " Address:" . $data->getAddress());
 
-
+		/*
 		foreach($data->getSubaddressAccounts() as $subAddressAccount) {
 			$output->writeln("Balance: " . $subAddressAccount->getBalance() . " (address: " . $subAddressAccount->getAddress());
 		}
+		*/
 
 
 
