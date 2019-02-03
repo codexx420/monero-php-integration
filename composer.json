@@ -1,0 +1,15 @@
+{
+    "require": {
+        "symfony/console": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Monero\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "7.2.3"
+        }
+    }
+}
