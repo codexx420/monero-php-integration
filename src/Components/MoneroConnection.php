@@ -11,6 +11,7 @@ use Monero\Structs\Balance;
 use Monero\Structs\CreateAddress;
 use Monero\Structs\SubAddress;
 use Monero\Structs\SubBalance;
+use Monero\Structs\Transfer;
 
 class MoneroConnection
 {
@@ -114,16 +115,16 @@ class MoneroConnection
 	 * @return AccountAddress
 	 */
 	public function getAddress(int $accountIndex, array $addressIndex = [])  : AccountAddress {
-		$data = $this->client->_run("get_address",["account_index" => $accountIndex,"address_index" => $addressIndex]);
+		$data = $this->client->_run('get_address',['account_index' => $accountIndex,'address_index' => $addressIndex]);
 		$subAddresses = [];
-		foreach($data["addresses"] as $addressArr)
+		foreach($data['addresses'] as $addressArr)
 			$subAddresses[] = new SubAddress(
-				$addressArr["address"],
-				$addressArr["label"],
-				$addressArr["address_index"],
-				$addressArr["used"]
+				$addressArr['address'],
+				$addressArr['label'],
+				$addressArr['address_index'],
+				$addressArr['used']
 			);
-		return new AccountAddress($data["address"],$subAddresses);
+		return new AccountAddress($data['address'],$subAddresses);
 	}
 
 	/**
@@ -131,8 +132,8 @@ class MoneroConnection
 	 * @return AddressIndex
 	 */
 	public function getAddressIndex(string $address) : AddressIndex {
-		$data = $this->client->_run("get_address_index",["address" => $address])["index"];
-		return new AddressIndex($data["major"],$data["minor"]);
+		$data = $this->client->_run('get_address_index',['address' => $address])['index'];
+		return new AddressIndex($data['major'],$data['minor']);
 	}
 
 	/**
@@ -141,23 +142,23 @@ class MoneroConnection
 	 * @return Balance
 	 */
 	public function getBalance(int $accountIndex,array $addressIndices = []) : Balance {
-		$data = $this->_run("get_balance",["account_index" => $accountIndex, "address_indices" => $addressIndices]);
+		$data = $this->_run('get_balance',['account_index' => $accountIndex, 'address_indices' => $addressIndices]);
 		$subAddressResults = [];
-		foreach($data["per_subaddress"] as $subadressArr)
+		foreach($data['per_subaddress'] as $subadressArr)
 			$subAddressResults[] = new SubBalance(
-				$subadressArr["address"],
-				$subadressArr["address_index"],
-				MoneroCalculator::AtomToMonero($subadressArr["balance"]),
-				$subadressArr["label"],
-				$subadressArr["num_unspent_outputs"],
-				MoneroCalculator::AtomToMonero($subadressArr["unlocked_balance"]),
+				$subadressArr['address'],
+				$subadressArr['address_index'],
+				MoneroCalculator::AtomToMonero($subadressArr['balance']),
+				$subadressArr['label'],
+				$subadressArr['num_unspent_outputs'],
+				MoneroCalculator::AtomToMonero($subadressArr['unlocked_balance']),
 				$accountIndex
 			);
 		return new Balance(
-			MoneroCalculator::AtomToMonero($data["balance"]),
+			MoneroCalculator::AtomToMonero($data['balance']),
 			false,
 			$subAddressResults,
-			MoneroCalculator::AtomToMonero($data["unlocked_balance"])
+			MoneroCalculator::AtomToMonero($data['unlocked_balance'])
 		);
 	}
 
@@ -165,7 +166,7 @@ class MoneroConnection
 	 * @return int
 	 */
 	public function getVersion() : int {
-		return (int)$this->_run("get_version")["version"];
+		return (int)$this->_run('get_version')['version'];
 	}
 
 	/**
@@ -173,8 +174,8 @@ class MoneroConnection
 	 * @return Account
 	 */
 	public function createAccount(?string $label = null) : Account {
-		$data = $this->_run("create_account",["label" => $label]);
-		return new Account($data['account_index'],(string)$label,$data["address"]);
+		$data = $this->_run('create_account',['label' => $label]);
+		return new Account($data['account_index'],(string)$label,$data['address']);
 	}
 
 	/**
@@ -183,8 +184,8 @@ class MoneroConnection
 	 * @return CreateAddress
 	 */
 	public function createAddress(int $accountIndex, ?string $label = null) : CreateAddress {
-		$data = $this->_run("create_address",["account_index" => $accountIndex, "label" => $label]);
-		return new CreateAddress($data["address"],$data["address_index"]);
+		$data = $this->_run('create_address',['account_index' => $accountIndex, 'label' => $label]);
+		return new CreateAddress($data['address'],$data['address_index']);
 	}
 
 	/**
@@ -193,7 +194,7 @@ class MoneroConnection
 	 * @param string $label
 	 */
 	public function labelAddress(int $accountIndex, int $addressIndex, string $label) {
-		$this->_run("label_address",["index" => [$accountIndex,$addressIndex], "label" => $label]);
+		$this->_run('label_address',['index' => [$accountIndex,$addressIndex], 'label' => $label]);
 	}
 
 	/**
@@ -201,7 +202,7 @@ class MoneroConnection
 	 * @param string $label
 	 */
 	public function labelAccount(int $accountIndex, string $label) {
-		$this->_run("label_account",["account_index" => $accountIndex,"label" => $label]);
+		$this->_run('label_account',['account_index' => $accountIndex,'label' => $label]);
 	}
 
 	/**
@@ -209,22 +210,22 @@ class MoneroConnection
 	 * @return AccountsResult
 	 */
 	public function getAccounts(?string $tag = null) {
-		$data = $this->_run("get_accounts",["tag" => $tag]);
+		$data = $this->_run('get_accounts',['tag' => $tag]);
 		$subAddressBalances = [];
-		foreach($data["subaddress_accounts"] as $subArr)
+		foreach($data['subaddress_accounts'] as $subArr)
 			$subAddressBalances[] = new SubBalance(
-				$subArr["base_address"],
+				$subArr['base_address'],
 				0,
-				MoneroCalculator::AtomToMonero($subArr["balance"]),
-				$subArr["label"],
+				MoneroCalculator::AtomToMonero($subArr['balance']),
+				$subArr['label'],
 				0,
-				MoneroCalculator::AtomToMonero($subArr["unlocked_balance"]),
-				$subArr["account_index"]
+				MoneroCalculator::AtomToMonero($subArr['unlocked_balance']),
+				$subArr['account_index']
 			);
 		return new AccountsResult(
 			$subAddressBalances,
-			MoneroCalculator::AtomToMonero($data["total_balance"]),
-			MoneroCalculator::AtomToMonero($data["total_unlocked_balance"])
+			MoneroCalculator::AtomToMonero($data['total_balance']),
+			MoneroCalculator::AtomToMonero($data['total_unlocked_balance'])
 		);
 	}
 
@@ -233,22 +234,80 @@ class MoneroConnection
 	 * @param array $accountIndices
 	 */
 	public function tagAccounts(string $tag, array $accountIndices) {
-		$this->_run("tag_accounts",["tag" => $tag, "accounts" => $accountIndices]);
+		$this->_run('tag_accounts',['tag' => $tag, 'accounts' => $accountIndices]);
 	}
 
 	/**
 	 * @return AccountTag[]
-	 * TODO add "label" in return
+	 * TODO add 'label' in return
 	 */
 	public function getAccountTags() : array {
-		$data = $this->_run("get_account_tags");
+		$data = $this->_run('get_account_tags');
 		$tags = [];
-		foreach($data["account_tags"] as $tagArr)
-			$tags[] = new AccountTag($tagArr["accounts"],$tagArr["tag"]);
+		foreach($data['account_tags'] as $tagArr)
+			$tags[] = new AccountTag($tagArr['accounts'],$tagArr['tag']);
 		return $tags;
 	}
 
+	/**
+	 * @param array $accountIndices
+	 */
 	public function untagAccounts(array $accountIndices) {
-		//$this->_run("untag_accounts",["accounts"])
+		$this->_run('untag_accounts',['accounts' => $accountIndices]);
+	}
+
+	/**
+	 * @param string $tag
+	 * @param string $description
+	 */
+	public function setAccountTagDescription(string $tag, string $description) {
+		$this->_run('set_account_tag_description',['tag' => $tag, 'description' => $description]);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getHeight() : int {
+		return (int)$this->_run('get_height')['height'];
+	}
+
+	/**
+	 * @param array $destinations
+	 * @param int|null $accountIndex
+	 * @param int[]|null $subaddrIndices
+	 * @param int|null $priority
+	 * @param int|null $mixin
+	 * @param int|null $ringSize
+	 * @param int $unlockTime
+	 * @param string|null $paymentId
+	 * @return Transfer
+	 */
+	public function transfer(
+		array $destinations,
+		?int $accountIndex = null,
+		?array $subaddrIndices = null,
+		?int $priority = null,
+		?int $mixin = null,
+		?int $ringSize = null,
+		?int $unlockTime = null,
+		?string $paymentId = null
+	) : Transfer {
+		$data = $this->_run("transfer",[
+			"destinations" => $destinations,
+			"account_index" => $accountIndex,
+			"subaddr_indices" => $subaddrIndices,
+			"priority" => $priority,
+			"mixin" => $mixin,
+			"ring_size" => $ringSize,
+			"unlock_time" => $unlockTime,
+			"payment_id" => $paymentId,
+			"get_tx_key" => true,
+		]);
+		return new Transfer(
+			MoneroCalculator::AtomToMonero($data["amount"]),
+			MoneroCalculator::AtomToMonero($data["fee"]),
+			$data["tx_hash"],
+			$data["tx_key"]
+		);
 	}
 }
